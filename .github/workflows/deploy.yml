@@ -45,7 +45,8 @@ jobs:
           az webapp config container set \
             --name midterm-app-group9 \
             --resource-group midterm-group9 \
-            --container-image-name acrgroup9final.azurecr.io/midterm-app:${{ github.sha }}
+            --container-image-name acrgroup9final.azurecr.io/midterm-app:${{ github.sha }} \
+            --container-registry-url https://acrgroup9final.azurecr.io
 
           az webapp restart \
             --name midterm-app-group9 \
