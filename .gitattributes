@@ -1,0 +1,4 @@
+# Force LF line endings for shell scripts and SSH config
+init.sh text eol=lf
+sshd_config text eol=lf
+*.sh text eol=lf

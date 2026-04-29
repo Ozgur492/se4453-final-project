@@ -1,0 +1,52 @@
+name: Build and Deploy to Azure App Service
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Azure Login (Service Principal ile)
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # 3. ACR Login (admin credentials ile)
+      - name: Login to ACR
+        uses: azure/docker-login@v2
+        with:
+          login-server: acrgroup9final.azurecr.io
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      # 4. Build & Push Docker image to ACR
+      - name: Build and push image
+        run: |
+          docker build -t acrgroup9final.azurecr.io/midterm-app:${{ github.sha }} .
+          docker build -t acrgroup9final.azurecr.io/midterm-app:latest .
+          docker push acrgroup9final.azurecr.io/midterm-app:${{ github.sha }}
+          docker push acrgroup9final.azurecr.io/midterm-app:latest
+
+      # 5. Verify Azure auth context is still active (fail-fast guard)
+      - name: Verify Azure CLI session
+        run: az account show --query "{sub:id, tenant:tenantId}" -o table
+
+      # 6. Deploy to App Service (az CLI ile — deploy adimi)
+      - name: Deploy container to App Service
+        run: |
+          az webapp config container set \
+            --name midterm-app-group9 \
+            --resource-group midterm-group9 \
+            --container-image-name acrgroup9final.azurecr.io/midterm-app:${{ github.sha }}
+
+          az webapp restart \
+            --name midterm-app-group9 \
+            --resource-group midterm-group9

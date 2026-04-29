@@ -1,0 +1,12 @@
+.git
+.github
+__pycache__
+*.pyc
+21070001058.doc
+activity_logs.json
+arm_template.json
+startup.txt
+README.md
+LICENSE
+.env
+.vscode
